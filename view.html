@@ -1,0 +1,67 @@
+<script>
+    // 1. Kunin ang encoded data mula sa URL (?d=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedData = urlParams.get('d');
+
+    if (encodedData) {
+        try {
+            // Mas safe na decoding para sa special characters
+            const decodedString = decodeURIComponent(escape(atob(encodedData)));
+            const d = JSON.parse(decodedString);
+
+            // 2. I-display sa document format
+            document.getElementById('docContent').innerHTML = `
+                <div class="section-title">Patient Identity</div>
+                <div class="info-row">
+                    <div class="label">Full Name</div>
+                    <div class="value">${d.name}</div>
+                </div>
+                <div style="display:flex; justify-content: space-between;">
+                    <div class="info-row">
+                        <div class="label">Age</div>
+                        <div class="value">${d.age} yrs old</div>
+                    </div>
+                    <div class="info-row" style="text-align:right;">
+                        <div class="label">Blood Type</div>
+                        <div class="blood-badge">${d.blood}</div>
+                    </div>
+                </div>
+
+                <div class="section-title">Critical Medical Info</div>
+                <div class="critical-box">
+                    <div class="label" style="color:#C53030;">⚠️ Allergies</div>
+                    <div class="value">${d.allergies}</div>
+                </div>
+                <div class="info-row">
+                    <div class="label">Medical History</div>
+                    <div class="value">${d.bg}</div>
+                </div>
+                <div class="info-row">
+                    <div class="label">Maintenance Medications</div>
+                    <div class="value">${d.meds}</div>
+                </div>
+
+                <div class="section-title">Emergency Contact</div>
+                <div class="info-row">
+                    <div class="label">Relative Name</div>
+                    <div class="value">${d.relName}</div>
+                    <div class="value" style="color:#E63946; font-weight:bold;">${d.relNum}</div>
+                </div>
+
+                <div class="section-title">Notes</div>
+                <div class="info-row" style="background:#f1f3f5; padding:10px; border-radius:8px; font-style:italic;">
+                    "${d.notes}"
+                </div>
+            `;
+            document.getElementById('serial').innerText = d.s || "N/A";
+
+        } catch (e) {
+            console.error(e);
+            document.getElementById('docContent').innerHTML = 
+                `<p style='color:red; text-align:center;'><b>Error Decoding:</b> Ang QR data ay hindi tugma o corrupted.</p>`;
+        }
+    } else {
+        document.getElementById('docContent').innerHTML = 
+            "<p style='text-align:center; color:#666;'>No medical data found. Please scan a valid Navi Tag QR.</p>";
+    }
+</script>

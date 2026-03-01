@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Medical ID</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --red: #E63946; --dark: #1D3557; }
+        body { font-family: 'Inter', sans-serif; background: #DEE2E6; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .document-container { background: white; width: 100%; max-width: 500px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-top: 12px solid var(--red); overflow: hidden; }
+        .header { background: var(--red); color: white; padding: 20px; text-align: center; }
+        .content { padding: 25px; min-height: 200px; }
+        .section-title { color: var(--red); font-weight: 800; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #eee; margin: 20px 0 10px 0; padding-bottom: 5px; }
+        .info-row { margin-bottom: 15px; }
+        .label { font-size: 11px; color: #6c757d; font-weight: 700; text-transform: uppercase; }
+        .value { font-size: 17px; color: var(--dark); font-weight: 600; margin-top: 2px; }
+        .critical-box { background: #FFF5F5; border: 1px solid #FEB2B2; border-radius: 10px; padding: 15px; margin: 15px 0; }
+        .blood-badge { background: var(--red); color: white; padding: 5px 15px; border-radius: 50px; font-size: 24px; font-weight: 900; }
+    </style>
+</head>
+<body>
+
+    <div class="document-container">
+        <div class="header">
+            <h1 style="margin:0; font-size:20px;">Emergency Medical ID</h1>
+            <p style="margin:5px 0 0 0; font-size:12px; opacity:0.8;">Navi Tag System</p>
+        </div>
+
+        <div class="content" id="docContent">
+            <p style="text-align:center; color:#999;">Initializing secure connection...</p>
+        </div>
+        
+        <div style="text-align:center; padding-bottom: 20px; font-size: 10px; color: #adb5bd;">
+            ID Serial: <span id="serialNum">----</span>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('d');
+
+            const contentDiv = document.getElementById('docContent');
+            const serialSpan = document.getElementById('serialNum');
+
+            if (encodedData) {
+                try {
+                    // Decoding process
+                    const decodedData = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+
+                    // Populate the HTML
+                    contentDiv.innerHTML = `
+                        <div class="section-title">Patient Identity</div>
+                        <div class="info-row">
+                            <div class="label">Full Name</div>
+                            <div class="value">${decodedData.name || 'N/A'}</div>
+                        </div>
+                        <div style="display:flex; justify-content: space-between; align-items:center;">
+                            <div class="info-row">
+                                <div class="label">Age</div>
+                                <div class="value">${decodedData.age || 'N/A'} yrs old</div>
+                            </div>
+                            <div class="info-row" style="text-align:right;">
+                                <div class="label">Blood Type</div>
+                                <div class="blood-badge">${decodedData.blood || '?'}</div>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Critical Medical Info</div>
+                        <div class="critical-box">
+                            <div class="label" style="color:#C53030;">⚠️ Allergies</div>
+                            <div class="value">${decodedData.allergies || 'None'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="label">Medical History</div>
+                            <div class="value">${decodedData.bg || 'None'}</div>
+                        </div>
+
+                        <div class="section-title">Emergency Contact</div>
+                        <div class="info-row">
+                            <div class="label">Relative Name</div>
+                            <div class="value">${decodedData.relName || 'N/A'}</div>
+                            <div class="value" style="color:var(--red);">${decodedData.relNum || 'N/A'}</div>
+                        </div>
+
+                        <div class="section-title">Notes</div>
+                        <div class="info-row" style="background:#f1f3f5; padding:10px; border-radius:8px; font-style:italic;">
+                            "${decodedData.notes || 'No additional notes'}"
+                        </div>
+                    `;
+                    serialSpan.innerText = decodedData.s || "N/A";
+
+                } catch (e) {
+                    contentDiv.innerHTML = "<p style='color:red; text-align:center;'><b>Error:</b> Data is corrupted or invalid.</p>";
+                    console.error("Decode error:", e);
+                }
+            } else {
+                contentDiv.innerHTML = "<p style='text-align:center;'>No medical record found in this QR.</p>";
+            }
+        };
+    </script>
+</body>
+</html>

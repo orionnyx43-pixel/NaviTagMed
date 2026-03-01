@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Medical ID</title>
+    <style>
+        body { font-family: sans-serif; background: #eee; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; width: 100%; max-width: 400px; border-radius: 20px; border-top: 10px solid #E63946; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .label { font-size: 12px; color: #888; text-transform: uppercase; font-weight: bold; }
+        .value { font-size: 18px; margin-bottom: 15px; color: #1D3557; }
+        .blood { background: #E63946; color: white; padding: 5px 15px; border-radius: 50px; float: right; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card" id="display">
+        <p>Loading medical record...</p>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const data = urlParams.get('d');
+        if (data) {
+            try {
+                const d = JSON.parse(decodeURIComponent(escape(atob(data))));
+                document.getElementById('display').innerHTML = `
+                    <div class="blood">${d.blood}</div>
+                    <h2>Emergency Profile</h2>
+                    <div class="label">Name</div><div class="value">${d.name}</div>
+                    <div class="label">Age</div><div class="value">${d.age}</div>
+                    <div class="label">Allergies</div><div class="value">${d.allergies}</div>
+                    <hr>
+                    <div class="label">Emergency Contact</div><div class="value">${d.relName}</div>
+                    <div class="value" style="color:#E63946; font-weight:bold;">${d.relNum}</div>
+                `;
+            } catch(e) { document.getElementById('display').innerHTML = "Invalid QR Code Data."; }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navi Tag | Emergency Medical ID</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --red: #E63946; --blue: #1D3557; --gray: #F1F3F5; }
+        body { font-family: 'Inter', sans-serif; background: #F8F9FA; margin: 0; padding: 15px; display: flex; justify-content: center; }
+        
+        .card { width: 100%; max-width: 500px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        /* Emergency Header */
+        .emergency-header { background: var(--red); color: white; padding: 25px; text-align: center; }
+        .emergency-header h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+        .emergency-header p { margin: 5px 0 0; font-size: 12px; opacity: 0.9; font-weight: 700; text-transform: uppercase; }
+
+        .content { padding: 25px; }
+        
+        /* Section Styling */
+        .section-title { font-size: 11px; font-weight: 800; color: var(--red); text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; display: block; border-bottom: 2px solid var(--gray); padding-bottom: 5px; }
+        
+        .info-group { margin-bottom: 15px; }
+        .label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .value { font-size: 16px; font-weight: 700; color: var(--blue); line-height: 1.4; }
+        
+        /* Special Highlights */
+        .highlight-box { background: #fff5f5; border-left: 4px solid var(--red); padding: 12px; border-radius: 8px; margin-top: 5px; }
+        .blood-badge { background: white; color: var(--red); padding: 5px 12px; border-radius: 50px; font-weight: 900; display: inline-block; margin-top: 10px; font-size: 18px; }
+        
+        .contact-btn { display: block; width: 100%; background: var(--blue); color: white; text-align: center; padding: 15px; border-radius: 12px; text-decoration: none; font-weight: 800; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="mainCard">
+        <div class="emergency-header">
+            <h1>MEDICAL PROFILE</h1>
+            <p id="serialNum">Loading...</p>
+            <div id="bloodDisplay" class="blood-badge">--</div>
+        </div>
+
+        <div class="content">
+            <span class="section-title">1. Personal Information</span>
+            <div class="info-group">
+                <span class="label">Full Name</span>
+                <div id="nameDisplay" class="value">---</div>
+            </div>
+            <div class="info-group">
+                <span class="label">Age</span>
+                <div id="ageDisplay" class="value">---</div>
+            </div>
+            <div class="info-group">
+                <span class="label">Home Address</span>
+                <div id="addressDisplay" class="value">---</div>
+            </div>
+
+            <span class="section-title">2. Medical Information</span>
+            <div class="info-group">
+                <span class="label">Known Allergies</span>
+                <div id="allergiesDisplay" class="value highlight-box" style="color: var(--red);">---</div>
+            </div>
+            <div class="info-group">
+                <span class="label">Maintenance Meds</span>
+                <div id="medsDisplay" class="value">---</div>
+            </div>
+            <div class="info-group">
+                <span class="label">Medical Conditions</span>
+                <div id="historyDisplay" class="value">---</div>
+            </div>
+
+            <span class="section-title">3. Emergency Contact</span>
+            <div class="info-group">
+                <span class="label">Contact Person</span>
+                <div id="relNameDisplay" class="value">---</div>
+            </div>
+            <div class="info-group">
+                <span class="label">Relationship</span>
+                <div id="relTypeDisplay" class="value">---</div>
+            </div>
+            
+            <a href="#" id="callBtn" class="contact-btn">📞 CALL EMERGENCY CONTACT</a>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('d');
+
+            if (!encodedData) {
+                document.getElementById('mainCard').innerHTML = "<div style='padding:50px; text-align:center;'><h2>No Data Found</h2><p>Please scan a valid Navi Tag QR code.</p></div>";
+                return;
+            }
+
+            try {
+                // Decode logic matching your form.html
+                const decodedString = atob(encodedData);
+                const data = JSON.parse(decodeURIComponent(escape(decodedString)));
+
+                // Populate Fields
+                document.getElementById('serialNum').innerText = data.s || "ID: UNKNOWN";
+                document.getElementById('bloodDisplay').innerText = data.blood || "N/A";
+                document.getElementById('nameDisplay').innerText = data.name || "N/A";
+                document.getElementById('ageDisplay').innerText = (data.age || "--") + " Years Old";
+                document.getElementById('addressDisplay').innerText = data.address || "N/A";
+                document.getElementById('allergiesDisplay').innerText = data.allergies || "None";
+                document.getElementById('medsDisplay').innerText = data.meds || "None";
+                document.getElementById('historyDisplay').innerText = data.history || "None";
+                document.getElementById('relNameDisplay').innerText = data.relName || "N/A";
+                document.getElementById('relTypeDisplay').innerText = data.relType || "Contact";
+                
+                // Phone Call Logic
+                const callBtn = document.getElementById('callBtn');
+                if(data.relNum) {
+                    callBtn.href = "tel:" + data.relNum;
+                    callBtn.innerText = "📞 CALL: " + data.relNum;
+                } else {
+                    callBtn.style.display = "none";
+                }
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('mainCard').innerHTML = "<div style='padding:50px; text-align:center;'><h2>Error Decoding Data</h2><p>The QR code might be corrupted.</p></div>";
+            }
+        };
+    </script>
+</body>
+</html>

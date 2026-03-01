@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVI TAG | Emergency Medical Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #E63946;
+            --dark: #1D3557;
+            --light: #F8F9FA;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #DEE2E6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .document-container {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-top: 12px solid var(--red);
+        }
+        .header {
+            background: var(--red);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+        .content { padding: 25px; }
+        .section-title {
+            color: var(--red);
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #eee;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+        }
+        .info-row { margin-bottom: 15px; }
+        .label { font-size: 11px; color: #6c757d; font-weight: 700; text-transform: uppercase; }
+        .value { font-size: 17px; color: var(--dark); font-weight: 600; margin-top: 2px; }
+        
+        /* Highlight for Critical Info */
+        .critical-box {
+            background: #FFF5F5;
+            border: 1px solid #FEB2B2;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .blood-badge {
+            background: var(--red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 900;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="document-container">
+        <div class="header">
+            <h1>Emergency Medical ID</h1>
+            <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">Scanned via Navi Tag System</p>
+        </div>
+
+        <div class="content" id="docContent">
+            <p style="text-align:center;">Decoding medical data...</p>
+        </div>
+        
+        <div style="text-align:center; padding-bottom: 20px; font-size: 10px; color: #adb5bd;">
+            Verification Code: <span id="serial"></span>
+        </div>
+    </div>
+
+    <script>
+        // 1. Kunin ang encoded data mula sa URL (?d=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('d');
+
+        if (encodedData) {
+            try {
+                // 2. I-decode ang Base64 JSON data
+                const d = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+
+                // 3. I-display sa document format
+                document.getElementById('docContent').innerHTML = `
+                    <div class="section-title">Patient Identity</div>
+                    <div class="info-row">
+                        <div class="label">Full Name</div>
+                        <div class="value">${d.name}</div>
+                    </div>
+                    <div style="display:flex; justify-content: space-between;">
+                        <div class="info-row">
+                            <div class="label">Age</div>
+                            <div class="value">${d.age} yrs old</div>
+                        </div>
+                        <div class="info-row" style="text-align:right;">
+                            <div class="label">Blood Type</div>
+                            <div class="blood-badge">${d.blood}</div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Critical Medical Info</div>
+                    <div class="critical-box">
+                        <div class="label" style="color:#C53030;">⚠️ Allergies</div>
+                        <div class="value">${d.allergies}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">Medical History / Background</div>
+                        <div class="value">${d.bg}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">Maintenance Medications</div>
+                        <div class="value">${d.meds}</div>
+                    </div>
+
+                    <div class="section-title">Emergency Contact</div>
+                    <div class="info-row">
+                        <div class="label">Primary Relative</div>
+                        <div class="value">${d.relName}</div>
+                        <div class="value" style="color:var(--red);">${d.relNum}</div>
+                    </div>
+
+                    <div class="section-title">Notes for First Aiders</div>
+                    <div class="info-row" style="background:#f1f3f5; padding:10px; border-radius:8px; font-style:italic;">
+                        "${d.notes}"
+                    </div>
+                `;
+                document.getElementById('serial').innerText = d.s || "N/A";
+
+            } catch (e) {
+                document.getElementById('docContent').innerHTML = "<p style='color:red;'>Error: Data corruption or invalid QR code.</p>";
+            }
+        } else {
+            document.getElementById('docContent').innerHTML = "<p>No medical data found. Please scan a valid Navi Tag.</p>";
+        }
+    </script>
+</body>
+</html>
